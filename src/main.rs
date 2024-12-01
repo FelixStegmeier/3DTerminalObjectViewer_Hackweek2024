@@ -1,5 +1,6 @@
 mod camera;
 mod objects;
+mod structs;
 
 ///creates a single 'snapshot' buffer of chars
 fn test_snapshot() {
