@@ -1,6 +1,8 @@
 use std::ops::{self, Index};
 use std::error::Error;
 
+use chrono::OutOfRange;
+
 enum IndexError{
     IndexOutOfBounds,
 }
@@ -37,18 +39,20 @@ pub struct Vector3 {
     pub y: f64,
     pub z: f64,
 }
+
 type Point = Vector3;
-// impl Index<i32> for Vector3{//was zur Hoelle 
-//     type Output = Option<f64>;
-//     fn index(&self, index: i32) -> &Self::Output{ //&<Self as Index<i32>>::Output {
-//         match index{
-//             0 => &Some(self.x),
-//             1 => &Some(self.y),
-//             2 => &Some(self.z),
-//             _ => &None
-//         }
-//     }
-// }
+impl Index<usize> for Vector3{
+    type Output = f64;
+    fn index(&self, index: usize) -> &Self::Output{
+        match index{
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!(), //////////////////////////////////////////////////fick dich doch
+        }
+    }
+}
+
 impl PartialEq<Vector3> for Vector3 {
     fn eq(&self, vec: &Vector3) -> bool {
         self.x == vec.x && self.y == vec.y && self.z == vec.z
@@ -116,30 +120,65 @@ impl std::fmt::Display for Object {
 //         }
 //     }
 // }
-// impl ops::Mul for TransformMatrix {
-//     type Output = TransformMatrix;
-//     fn mul(self, vec: TransformMatrix) -> Self::Output {
-//         //yes... i wrote it out
-//         TransformMatrix {
-//             col1: Point {
-//                 x: (self.col1.x * vec.col1.x + self.col2.x * vec.col1.y + self.col3.x * vec.col1.z),
-//                 y: (self.col1.y * vec.col1.x + self.col2.y * vec.col1.y + self.col3.y * vec.col1.z),
-//                 z: (self.col1.z * vec.col1.x + self.col2.z * vec.col1.y + self.col3.z * vec.col1.z),
-//             },
-//             col2: Point {
-//                 x: self.col1.x * vec.col2.x + self.col2.x * vec.col2.y + self.col3.x * vec.col2.z,
-//                 y: self.col1.y * vec.col2.x + self.col2.y * vec.col2.y + self.col3.y * vec.col2.z,
-//                 z: self.col1.z * vec.col2.x + self.col2.z * vec.col2.y + self.col3.z * vec.col2.z,
-//             },
-//             col3: Point {
-//                 x: (self.col1.x * vec.col3.x + self.col2.x * vec.col3.y + self.col3.x * vec.col3.z),
-//                 y: (self.col1.y * vec.col3.x + self.col2.y * vec.col3.y + self.col3.y * vec.col3.z),
-//                 z: (self.col1.z * vec.col3.x + self.col2.z * vec.col3.y + self.col3.z * vec.col3.z),
-//             },
-//         }
-//     }
-// }
+impl ops::Mul for TransformMatrix {
+    type Output = TransformMatrix;
+    fn mul(self, matrix_2: Self) -> Self::Output {
+        let mut sum: f64;
+        let mut rows: [Vector3; 3] = [Vector3{x: 0., y: 0., z: 0.}; 3];
+        for row_index in 0..3{
+            let mut v: Vector3 = Vector3{x: 0., y: 0., z: 0.};
+            for col_index in 0..3{
+                sum = 0.;
+                for i in 0..3 {
+                    sum += self[row_index][i] * matrix_2[i][col_index];
+                }
+                v.x = sum;
+            }
+            rows[row_index] = v;
+        }
+        TransformMatrix{row_1: rows[0], row_2: rows[1], row_3: rows[2]}
+    }
+    /* fn mul(self, vec: TransformMatrix) -> Self::Output {
 
+        TransformMatrix {
+            col1: Point {
+                x: (self.col1.x * vec.col1.x + self.col2.x * vec.col1.y + self.col3.x * vec.col1.z),
+                y: (self.col1.y * vec.col1.x + self.col2.y * vec.col1.y + self.col3.y * vec.col1.z),
+                z: (self.col1.z * vec.col1.x + self.col2.z * vec.col1.y + self.col3.z * vec.col1.z),
+            },
+            col2: Point {
+                x: self.col1.x * vec.col2.x + self.col2.x * vec.col2.y + self.col3.x * vec.col2.z,
+                y: self.col1.y * vec.col2.x + self.col2.y * vec.col2.y + self.col3.y * vec.col2.z,
+                z: self.col1.z * vec.col2.x + self.col2.z * vec.col2.y + self.col3.z * vec.col2.z,
+            },
+            col3: Point {
+                x: (self.col1.x * vec.col3.x + self.col2.x * vec.col3.y + self.col3.x * vec.col3.z),
+                y: (self.col1.y * vec.col3.x + self.col2.y * vec.col3.y + self.col3.y * vec.col3.z),
+                z: (self.col1.z * vec.col3.x + self.col2.z * vec.col3.y + self.col3.z * vec.col3.z),
+            },
+        }
+    } */
+    
+}
+///helper for matrix * matrix, calcs one cell
+fn matrix_matrix_cell(matrix_1: TransformMatrix, matrix_2: TransformMatrix, row: usize, col: usize) -> f64{
+    let mut sum = 0.;
+    for i in 0..3 {
+        sum += matrix_1[row][i] * matrix_2[i][col];
+    }
+    sum
+}
+impl Index<usize> for TransformMatrix{
+    type Output = Vector3;
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.row_1,
+            1 => &self.row_2,
+            2 => &self.row_3,
+            _ => panic!()
+        }
+    }
+}
 impl ops::Mul<[f64; 3]> for TransformMatrix {
     type Output = [f64; 3];
     fn mul(self, vec: [f64; 3]) -> Self::Output {
