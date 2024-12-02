@@ -7,14 +7,14 @@ enum IndexError {
     IndexOutOfBounds,
 }
 #[derive(Clone, PartialEq)]
-struct TransformMatrix {
-    row_1: Vector3,
-    row_2: Vector3,
-    row_3: Vector3,
+pub struct TransformMatrix {
+    pub row_1: Vector3,
+    pub row_2: Vector3,
+    pub row_3: Vector3,
 }
-impl std::fmt::Display for TransformMatrix{
+impl std::fmt::Display for TransformMatrix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}\n{}\n{}\n",self.row_1, self.row_2, self.row_3)
+        write!(f, "{}\n{}\n{}\n", self.row_1, self.row_2, self.row_3)
     }
 }
 impl ops::Mul<Vector3> for TransformMatrix {
@@ -44,9 +44,14 @@ pub struct Vector3 {
     pub y: f64,
     pub z: f64,
 }
+impl PartialEq<Vector3> for Vector3 {
+    fn eq(&self, vec: &Vector3) -> bool {
+        self.x == vec.x && self.y == vec.y && self.z == vec.z
+    }
+}
 impl IndexMut<usize> for Vector3 {
-    fn index_mut(&mut self, index: usize) -> &mut f64{//&mut Self::Output {
-        match index{
+    fn index_mut(&mut self, index: usize) -> &mut f64 {
+        match index {
             0 => &mut self.x,
             1 => &mut self.y,
             2 => &mut self.z,
@@ -63,14 +68,8 @@ impl Index<usize> for Vector3 {
             0 => &self.x,
             1 => &self.y,
             2 => &self.z,
-            _ => panic!(), //////////////////////////////////////////////////fick dich doch
+            _ => panic!(),
         }
-    }
-}
-
-impl PartialEq<Vector3> for Vector3 {
-    fn eq(&self, vec: &Vector3) -> bool {
-        self.x == vec.x && self.y == vec.y && self.z == vec.z
     }
 }
 impl ops::Mul<f64> for Vector3 {
@@ -80,6 +79,16 @@ impl ops::Mul<f64> for Vector3 {
             x: self.x * scalar,
             y: self.y * scalar,
             z: self.z * scalar,
+        }
+    }
+}
+impl ops::Add for Vector3 {
+    type Output = Vector3;
+    fn add(self, vec: Vector3) -> Self::Output {
+        Vector3 {
+            x: self.x + vec.x,
+            y: self.y + vec.y,
+            z: self.z + vec.z,
         }
     }
 }
@@ -143,7 +152,10 @@ impl ops::Mul for TransformMatrix {
             for col_index in 0..3 {
                 sum = 0.;
                 for i in 0..3 {
-                    print!("sum: {} += {} * {}\n", sum,  self[row_index][i], matrix_2[i][col_index]);
+                    print!(
+                        "sum: {} += {} * {}\n",
+                        sum, self[row_index][i], matrix_2[i][col_index]
+                    );
                     sum += self[row_index][i] * matrix_2[i][col_index];
                 }
                 v[col_index] = sum;
@@ -186,39 +198,57 @@ mod tests {
     use super::*;
     #[test]
     fn test_matrix_matrix_mult() {
-        let m1 =TransformMatrix {
+        let m1 = TransformMatrix {
             row_1: Vector3 {
-                x: -1., y: -1., z: 2.,
+                x: -1.,
+                y: -1.,
+                z: 2.,
             },
             row_2: Vector3 {
-                x: 1., y: -1., z: 2.,
+                x: 1.,
+                y: -1.,
+                z: 2.,
             },
             row_3: Vector3 {
-                x: 3., y: -3., z: 2.,
+                x: 3.,
+                y: -3.,
+                z: 2.,
             },
         };
         let m2 = TransformMatrix {
             row_1: Vector3 {
-                x: 2., y: 3., z: 1.,
+                x: 2.,
+                y: 3.,
+                z: 1.,
             },
             row_2: Vector3 {
-                x: -1., y: -2., z: 1.,
+                x: -1.,
+                y: -2.,
+                z: 1.,
             },
             row_3: Vector3 {
-                x: 3., y: -3., z: 2.,
+                x: 3.,
+                y: -3.,
+                z: 2.,
             },
         };
         let m_res = TransformMatrix {
             row_1: Vector3 {
-                x: 5., y: -7., z: 2.,
+                x: 5.,
+                y: -7.,
+                z: 2.,
             },
             row_2: Vector3 {
-                x: 9., y: -1., z: 4.,
+                x: 9.,
+                y: -1.,
+                z: 4.,
             },
             row_3: Vector3 {
-                x: 15., y: 9., z: 4.,
+                x: 15.,
+                y: 9.,
+                z: 4.,
             },
         };
-        assert_eq!(m1*m2 == m_res, true);
+        assert_eq!(m1 * m2 == m_res, true);
     }
 }
