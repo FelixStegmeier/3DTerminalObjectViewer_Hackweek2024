@@ -1,9 +1,9 @@
-use std::ops::{self, Index};
 use std::error::Error;
+use std::ops::{self, Index};
 
 use chrono::OutOfRange;
 
-enum IndexError{
+enum IndexError {
     IndexOutOfBounds,
 }
 #[derive(Clone)]
@@ -41,10 +41,10 @@ pub struct Vector3 {
 }
 
 type Point = Vector3;
-impl Index<usize> for Vector3{
+impl Index<usize> for Vector3 {
     type Output = f64;
-    fn index(&self, index: usize) -> &Self::Output{
-        match index{
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
             0 => &self.x,
             1 => &self.y,
             2 => &self.z,
@@ -124,10 +124,18 @@ impl ops::Mul for TransformMatrix {
     type Output = TransformMatrix;
     fn mul(self, matrix_2: Self) -> Self::Output {
         let mut sum: f64;
-        let mut rows: [Vector3; 3] = [Vector3{x: 0., y: 0., z: 0.}; 3];
-        for row_index in 0..3{
-            let mut v: Vector3 = Vector3{x: 0., y: 0., z: 0.};
-            for col_index in 0..3{
+        let mut rows: [Vector3; 3] = [Vector3 {
+            x: 0.,
+            y: 0.,
+            z: 0.,
+        }; 3];
+        for row_index in 0..3 {
+            let mut v: Vector3 = Vector3 {
+                x: 0.,
+                y: 0.,
+                z: 0.,
+            };
+            for col_index in 0..3 {
                 sum = 0.;
                 for i in 0..3 {
                     sum += self[row_index][i] * matrix_2[i][col_index];
@@ -136,7 +144,11 @@ impl ops::Mul for TransformMatrix {
             }
             rows[row_index] = v;
         }
-        TransformMatrix{row_1: rows[0], row_2: rows[1], row_3: rows[2]}
+        TransformMatrix {
+            row_1: rows[0],
+            row_2: rows[1],
+            row_3: rows[2],
+        }
     }
     /* fn mul(self, vec: TransformMatrix) -> Self::Output {
 
@@ -158,24 +170,28 @@ impl ops::Mul for TransformMatrix {
             },
         }
     } */
-    
 }
 ///helper for matrix * matrix, calcs one cell
-fn matrix_matrix_cell(matrix_1: TransformMatrix, matrix_2: TransformMatrix, row: usize, col: usize) -> f64{
+fn matrix_matrix_cell(
+    matrix_1: TransformMatrix,
+    matrix_2: TransformMatrix,
+    row: usize,
+    col: usize,
+) -> f64 {
     let mut sum = 0.;
     for i in 0..3 {
         sum += matrix_1[row][i] * matrix_2[i][col];
     }
     sum
 }
-impl Index<usize> for TransformMatrix{
+impl Index<usize> for TransformMatrix {
     type Output = Vector3;
     fn index(&self, index: usize) -> &Self::Output {
         match index {
             0 => &self.row_1,
             1 => &self.row_2,
             2 => &self.row_3,
-            _ => panic!()
+            _ => panic!(),
         }
     }
 }
@@ -199,3 +215,44 @@ impl ops::Mul<[f64; 3]> for TransformMatrix {
 //         ]
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_matrix_matrix_mult() {
+        let m1 =TransformMatrix {
+            row_1: Vector3 {
+                x: -1., y: -1., z: 2.,
+            },
+            row_2: Vector3 {
+                x: 1., y: -1., z: 2.,
+            },
+            row_3: Vector3 {
+                x: 3., y: -3., z: 2.,
+            },
+        };
+        let m2 = TransformMatrix {
+            row_1: Vector3 {
+                x: 2., y: 3., z: 1.,
+            },
+            row_2: Vector3 {
+                x: -1., y: -2., z: 1.,
+            },
+            row_3: Vector3 {
+                x: 3., y: -3., z: 2.,
+            },
+        };
+        let m_res = TransformMatrix {
+            row_1: Vector3 {
+                x: 5., y: -7., z: 2.,
+            },
+            row_2: Vector3 {
+                x: 9., y: -1., z: 4.,
+            },
+            row_3: Vector3 {
+                x: 15., y: 9., z: 4.,
+            },
+        };
+    }
+}
