@@ -1,16 +1,21 @@
 use std::error::Error;
-use std::ops::{self, Index};
+use std::ops::{self, Index, IndexMut};
 
 use chrono::OutOfRange;
 
 enum IndexError {
     IndexOutOfBounds,
 }
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 struct TransformMatrix {
     row_1: Vector3,
     row_2: Vector3,
     row_3: Vector3,
+}
+impl std::fmt::Display for TransformMatrix{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}\n{}\n{}\n",self.row_1, self.row_2, self.row_3)
+    }
 }
 impl ops::Mul<Vector3> for TransformMatrix {
     type Output = Vector3;
@@ -38,6 +43,16 @@ pub struct Vector3 {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+}
+impl IndexMut<usize> for Vector3 {
+    fn index_mut(&mut self, index: usize) -> &mut f64{//&mut Self::Output {
+        match index{
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => panic!(),
+        }
+    }
 }
 
 type Point = Vector3;
@@ -110,16 +125,6 @@ impl std::fmt::Display for Object {
     }
 }
 
-// impl ops::Mul<Point> for TransformMatrix {
-//     type Output = Point;
-//     fn mul(self, vec: Point) -> Self::Output {
-//         Point {
-//             x: self.col1.x * vec.x + self.col2.x * vec.y + self.col3.x * vec.z,
-//             y: self.col1.y * vec.x + self.col2.y * vec.y + self.col3.y * vec.z,
-//             z: self.col1.z * vec.x + self.col2.z * vec.y + self.col3.z * vec.z,
-//         }
-//     }
-// }
 impl ops::Mul for TransformMatrix {
     type Output = TransformMatrix;
     fn mul(self, matrix_2: Self) -> Self::Output {
@@ -138,10 +143,12 @@ impl ops::Mul for TransformMatrix {
             for col_index in 0..3 {
                 sum = 0.;
                 for i in 0..3 {
+                    print!("sum: {} += {} * {}\n", sum,  self[row_index][i], matrix_2[i][col_index]);
                     sum += self[row_index][i] * matrix_2[i][col_index];
                 }
-                v.x = sum;
+                v[col_index] = sum;
             }
+            print!("\nrow index: {}; new row: {}\n", row_index, v);
             rows[row_index] = v;
         }
         TransformMatrix {
@@ -150,40 +157,8 @@ impl ops::Mul for TransformMatrix {
             row_3: rows[2],
         }
     }
-    /* fn mul(self, vec: TransformMatrix) -> Self::Output {
+}
 
-        TransformMatrix {
-            col1: Point {
-                x: (self.col1.x * vec.col1.x + self.col2.x * vec.col1.y + self.col3.x * vec.col1.z),
-                y: (self.col1.y * vec.col1.x + self.col2.y * vec.col1.y + self.col3.y * vec.col1.z),
-                z: (self.col1.z * vec.col1.x + self.col2.z * vec.col1.y + self.col3.z * vec.col1.z),
-            },
-            col2: Point {
-                x: self.col1.x * vec.col2.x + self.col2.x * vec.col2.y + self.col3.x * vec.col2.z,
-                y: self.col1.y * vec.col2.x + self.col2.y * vec.col2.y + self.col3.y * vec.col2.z,
-                z: self.col1.z * vec.col2.x + self.col2.z * vec.col2.y + self.col3.z * vec.col2.z,
-            },
-            col3: Point {
-                x: (self.col1.x * vec.col3.x + self.col2.x * vec.col3.y + self.col3.x * vec.col3.z),
-                y: (self.col1.y * vec.col3.x + self.col2.y * vec.col3.y + self.col3.y * vec.col3.z),
-                z: (self.col1.z * vec.col3.x + self.col2.z * vec.col3.y + self.col3.z * vec.col3.z),
-            },
-        }
-    } */
-}
-///helper for matrix * matrix, calcs one cell
-fn matrix_matrix_cell(
-    matrix_1: TransformMatrix,
-    matrix_2: TransformMatrix,
-    row: usize,
-    col: usize,
-) -> f64 {
-    let mut sum = 0.;
-    for i in 0..3 {
-        sum += matrix_1[row][i] * matrix_2[i][col];
-    }
-    sum
-}
 impl Index<usize> for TransformMatrix {
     type Output = Vector3;
     fn index(&self, index: usize) -> &Self::Output {
@@ -205,16 +180,6 @@ impl ops::Mul<[f64; 3]> for TransformMatrix {
         ]
     }
 }
-// impl ops::Mul<[f64; 3]> for TransformMatrix {
-//     type Output = [f64; 3];
-//     fn mul(self, vec: [f64; 3]) -> Self::Output {
-//         [
-//             self.col1.x * vec[0] + self.col2.x * vec[1] + self.col3.x * vec[2],
-//             self.col1.y * vec[0] + self.col2.y * vec[1] + self.col3.y * vec[2],
-//             self.col1.z * vec[0] + self.col2.z * vec[1] + self.col3.z * vec[2],
-//         ]
-//     }
-// }
 
 #[cfg(test)]
 mod tests {
@@ -254,5 +219,6 @@ mod tests {
                 x: 15., y: 9., z: 4.,
             },
         };
+        assert_eq!(m1*m2 == m_res, true);
     }
 }
