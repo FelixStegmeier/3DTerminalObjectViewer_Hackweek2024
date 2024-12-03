@@ -1,45 +1,47 @@
 mod camera;
+mod geometry;
 mod objects;
 
+type Point = geometry::Vector3;
 ///creates a single 'snapshot' buffer of chars
 fn test_snapshot() {
     let mut obj: objects::Object = objects::new_test_obj();
     let main_camera = camera::new_camera();
-    let one_degree_transform = objects::TransformMatrix {
-        col1: objects::Point {
+    let one_degree_transform = TransformMatrix {
+        row_1: Vector3 {
             x: 0.95,
             y: 0.,
-            z: -0.0975,
+            z: 0.0975,
         },
-        col2: objects::Point {
+        row_2: Vector3 {
             x: 0.,
             y: 1.,
             z: 0.,
         },
-        col3: objects::Point {
-            x: 0.0975,
+        row_3: Vector3 {
+            x: -0.0975,
             y: 0.,
             z: 0.95,
         },
     };
     loop {
-        obj = objects::rotate(obj, one_degree_transform.clone());
         let vec_2d: Vec<Vec<[u8; 3]>> = camera::raycasting(
             main_camera.corners.top_left,
             main_camera.corners.top_right,
             main_camera.corners.bottom_left,
             main_camera.corners.bottom_right,
             main_camera,
-            obj.clone(), //obj.clone(),
+            obj.clone(),
         );
         draw(&vec_2d);
-        std::thread::sleep(time::Duration::from_millis(200));
+        std::thread::sleep(time::Duration::from_millis(2000));
+        obj = objects::rotate(obj, one_degree_transform.clone());
+
     }
     fn draw(vec_2d: &Vec<Vec<[u8; 3]>>) {
         let mut string = "".to_owned();
         for col in vec_2d {
             for cell in col {
-                //print!(" |{},{},{}| ", cell[0], cell[1], cell[2]);
                 if *cell == [0, 0, 0] {
                     string += "...";
                 } else {
@@ -67,6 +69,8 @@ fn draw(vec_2d: &Vec<Vec<[u8; 3]>>) -> String {
 }
 
 use core::time;
+
+use geometry::{TransformMatrix, Vector3};
 
 // fn init(){
 //     TimeDelta::new();
@@ -122,19 +126,19 @@ mod tests {
     fn test_draw_1() {
         let mut obj: objects::Object = objects::new_test_obj();
         let main_camera = camera::new_camera();
-        let one_degree_transform = objects::TransformMatrix {
-            col1: objects::Point {
+        let one_degree_transform = geometry::TransformMatrix {
+            row_1: Vector3 {
                 x: 0.95,
                 y: 0.,
-                z: -0.0975,
+                z: 0.0975,
             },
-            col2: objects::Point {
+            row_2: Vector3 {
                 x: 0.,
                 y: 1.,
                 z: 0.,
             },
-            col3: objects::Point {
-                x: 0.0975,
+            row_3: Vector3 {
+                x: -0.0975,
                 y: 0.,
                 z: 0.95,
             },
