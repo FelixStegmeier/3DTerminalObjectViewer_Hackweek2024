@@ -23,8 +23,8 @@ const _UNIT_MATRIX: TransformMatrix = TransformMatrix {
 #[derive(Clone)]
 pub struct Object {
     pub origin: Point,
-    pub vertices: Vec<[f64; 3]>,
-    pub transform_vertices: Vec<[f64; 3]>,
+    pub vertices: Vec<Vector3>,
+    pub transform_vertices: Vec<Vector3>,
     pub polygons: Vec<[usize; 3]>,
     pub transform_matrix: TransformMatrix,
     pub tranlation_vector: Vector3,
@@ -42,10 +42,10 @@ impl std::fmt::Display for Object {
 pub fn new_test_obj() -> Object {
     //points with origin as center:
     let vertices = vec![
-        [20., -20., 50.],
-        [-20., -20., 50.],
-        [0., 20., 0.],
-        [0., 0., -50.],
+        Vector3{x: 20., y: -20., z: 50.},
+        Vector3{x: -20.,y:  -20.,z:  50.},
+        Vector3{x: 0.,y: 20.,z: 0.},
+        Vector3{x: 0.,y: 0.,z: -50.},
     ];
     let polygons = vec![[0, 1, 2], [0, 1, 3], [2, 3, 0], [1, 2, 3]];
     let origin = Point {
@@ -70,7 +70,7 @@ pub fn new_test_obj() -> Object {
 }
 
 pub fn rotate(mut obj: Object, transform_matrix: TransformMatrix) -> Object {
-    let mut new_vertices: Vec<[f64; 3]> = vec![];
+    let mut new_vertices: Vec<Vector3> = vec![];
     for vertex in obj.vertices.clone() {
         new_vertices.push(transform_matrix.clone() * vertex);
     }

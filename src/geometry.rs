@@ -14,12 +14,6 @@ impl std::fmt::Display for TransformMatrix {
 impl ops::Mul<Vector3> for TransformMatrix {
     type Output = Vector3;
     fn mul(self, vec: Vector3) -> Self::Output {
-        print!(
-            "x: {}\ny: {}\n z: {}",
-            self.row_1.x * vec.x + self.row_1.y * vec.y + self.row_1.z * vec.z,
-            self.row_2.x * vec.x + self.row_2.y * vec.y + self.row_2.z * vec.z,
-            self.row_3.x * vec.x + self.row_3.y * vec.y + self.row_3.z * vec.z,
-        );
         Vector3 {
             x: self.row_1.x * vec.x + self.row_1.y * vec.y + self.row_1.z * vec.z,
             y: self.row_2.x * vec.x + self.row_2.y * vec.y + self.row_2.z * vec.z,
