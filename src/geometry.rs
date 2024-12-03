@@ -1,11 +1,5 @@
-use std::error::Error;
 use std::ops::{self, Index, IndexMut};
 
-use chrono::OutOfRange;
-
-enum IndexError {
-    IndexOutOfBounds,
-}
 #[derive(Clone, PartialEq)]
 pub struct TransformMatrix {
     pub row_1: Vector3,
@@ -20,10 +14,16 @@ impl std::fmt::Display for TransformMatrix {
 impl ops::Mul<Vector3> for TransformMatrix {
     type Output = Vector3;
     fn mul(self, vec: Vector3) -> Self::Output {
+        print!(
+            "x: {}\ny: {}\n z: {}",
+            self.row_1.x * vec.x + self.row_1.y * vec.y + self.row_1.z * vec.z,
+            self.row_2.x * vec.x + self.row_2.y * vec.y + self.row_2.z * vec.z,
+            self.row_3.x * vec.x + self.row_3.y * vec.y + self.row_3.z * vec.z,
+        );
         Vector3 {
-            x: self.row_1.x * vec.x + self.row_2.x * vec.y + self.row_3.x * vec.z,
-            y: self.row_1.y * vec.x + self.row_2.y * vec.y + self.row_3.y * vec.z,
-            z: self.row_1.z * vec.x + self.row_2.z * vec.y + self.row_3.z * vec.z,
+            x: self.row_1.x * vec.x + self.row_1.y * vec.y + self.row_1.z * vec.z,
+            y: self.row_2.x * vec.x + self.row_2.y * vec.y + self.row_2.z * vec.z,
+            z: self.row_3.x * vec.x + self.row_3.y * vec.y + self.row_3.z * vec.z,
         }
     }
 }
@@ -133,7 +133,6 @@ impl std::fmt::Display for Object {
         )
     }
 }
-
 impl ops::Mul for TransformMatrix {
     type Output = TransformMatrix;
     fn mul(self, matrix_2: Self) -> Self::Output {
@@ -250,5 +249,90 @@ mod tests {
             },
         };
         assert_eq!(m1 * m2 == m_res, true);
+    }
+    #[test]
+    fn test_add_for_vector3_1() {
+        assert_eq!(
+            Vector3 {
+                x: 0.,
+                y: 0.,
+                z: 0.
+            } + Vector3 {
+                x: 0.,
+                y: 0.,
+                z: 0.
+            } == Vector3 {
+                x: 0.,
+                y: 0.,
+                z: 0.
+            },
+            true
+        );
+    }
+    #[test]
+    fn test_add_for_vector3_2() {
+        assert_eq!(
+            Vector3 {
+                x: 4.,
+                y: -4.,
+                z: 3.
+            } + Vector3 {
+                x: 7.,
+                y: 2.,
+                z: 3.
+            } == Vector3 {
+                x: 11.,
+                y: -2.,
+                z: 6.
+            },
+            true
+        );
+    }
+    #[test]
+    fn test_mul_for_f64_vector3() {
+        assert_eq!(
+            Vector3 {
+                x: 7.,
+                y: 2.,
+                z: 3.
+            } * 2.
+                == Vector3 {
+                    x: 14.,
+                    y: 4.,
+                    z: 6.
+                },
+            true
+        );
+    }
+    #[test]
+    fn test_mul_for_vector3_transformmatrix() {
+        assert_eq!(
+            TransformMatrix {
+                row_1: Vector3 {
+                    x: 6.,
+                    y: 2.,
+                    z: 4.,
+                },
+                row_2: Vector3 {
+                    x: -1.,
+                    y: 4.,
+                    z: 3.,
+                },
+                row_3: Vector3 {
+                    x: -2.,
+                    y: 9.,
+                    z: 3.,
+                },
+            } * Vector3 {
+                x: 4.,
+                y: -2.,
+                z: 1.
+            } == Vector3 {
+                x: 24.,
+                y: -9.,
+                z: -23.
+            },
+            true
+        );
     }
 }
