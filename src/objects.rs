@@ -69,38 +69,6 @@ pub fn new_test_obj() -> Object {
     return obj;
 }
 
-fn calc_center_of_triangles(vertices: Vec<[f64; 3]>, polygons: Vec<[usize; 3]>) -> Vec<[f64; 3]> {
-    let mut center_points: Vec<[f64; 3]> = vec![];
-
-    for polygon in polygons {
-        let point_1 = vertices[polygon[0]];
-        let point_2 = vertices[polygon[1]];
-        let point_3 = vertices[polygon[2]];
-
-        let vec_1_2 = vector_from_a_to_b(point_1.clone(), point_2.clone());
-        let half_vec_1_2 = [vec_1_2[0] / 2., vec_1_2[0] / 2., vec_1_2[0] / 2.];
-        let halfway_point = [
-            point_1[0] + half_vec_1_2[0],
-            point_1[1] + half_vec_1_2[1],
-            point_1[2] + half_vec_1_2[2],
-        ];
-
-        let vec_halfway_point_ponint_3 = vector_from_a_to_b(halfway_point.clone(), point_3.clone());
-        let center_point = [
-            point_3[0] + vec_halfway_point_ponint_3[0],
-            point_3[1] + vec_halfway_point_ponint_3[1],
-            point_3[2] + vec_halfway_point_ponint_3[2],
-        ];
-
-        center_points.push(center_point);
-    }
-    return center_points;
-}
-
-fn vector_from_a_to_b(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
-    return [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
-}
-
 pub fn rotate(mut obj: Object, transform_matrix: TransformMatrix) -> Object {
     let mut new_vertices: Vec<[f64; 3]> = vec![];
     for vertex in obj.vertices.clone() {
@@ -114,8 +82,8 @@ pub fn rotate(mut obj: Object, transform_matrix: TransformMatrix) -> Object {
         obj.transform_vertices[i][0] = new_transform_matrix.row_1.x * vertex[0]
             + new_transform_matrix.row_1.y * vertex[1]
             + new_transform_matrix.row_1.z * vertex[2];
-        obj.transform_vertices[i][1] = new_transform_matrix.row_2.y * vertex[0]
-            + new_transform_matrix.row_2.x * vertex[1]
+        obj.transform_vertices[i][1] = new_transform_matrix.row_2.x * vertex[0]
+            + new_transform_matrix.row_2.y * vertex[1]
             + new_transform_matrix.row_2.z * vertex[2];
         obj.transform_vertices[i][2] = new_transform_matrix.row_3.x * vertex[0]
             + new_transform_matrix.row_3.y * vertex[1]

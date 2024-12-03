@@ -25,7 +25,6 @@ fn test_snapshot() {
         },
     };
     loop {
-        obj = objects::rotate(obj, one_degree_transform.clone());
         let vec_2d: Vec<Vec<[u8; 3]>> = camera::raycasting(
             main_camera.corners.top_left,
             main_camera.corners.top_right,
@@ -35,7 +34,9 @@ fn test_snapshot() {
             obj.clone(),
         );
         draw(&vec_2d);
-        std::thread::sleep(time::Duration::from_millis(200));
+        std::thread::sleep(time::Duration::from_millis(2000));
+        obj = objects::rotate(obj, one_degree_transform.clone());
+
     }
     fn draw(vec_2d: &Vec<Vec<[u8; 3]>>) {
         let mut string = "".to_owned();
