@@ -1,81 +1,7 @@
+use crate::geometry::{TransformMatrix, Vector3};
 use crate::objects;
 use core::panic;
-use std::{ops, vec};
-struct _TransformMatrix {
-    vx: Vector3,
-    vy: Vector3,
-    vz: Vector3,
-}
-impl ops::Mul<Vector3> for _TransformMatrix {
-    type Output = Vector3;
-    fn mul(self, vec: Vector3) -> Self::Output {
-        Vector3 {
-            x: self.vx.x * vec.x + self.vy.x * vec.y + self.vz.x * vec.z,
-            y: self.vx.y * vec.x + self.vy.y * vec.y + self.vz.y * vec.z,
-            z: self.vx.z * vec.x + self.vy.z * vec.y + self.vz.z * vec.z,
-        }
-    }
-}
-/// 1,1
-/// transform matrix:   |0  -1| 1   -1
-///                     |1   0| 1   11
-struct _Plane {
-    a: f64,
-    b: f64,
-    c: f64,
-    d: f64,
-}
-impl std::fmt::Display for _Plane {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "Plane: {}x {}y {}z {}", self.a, self.b, self.c, self.d)
-    }
-}
-#[derive(Copy, Clone, Debug)]
-pub struct Vector3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
-impl PartialEq<Vector3> for Vector3 {
-    fn eq(&self, vec: &Vector3) -> bool {
-        self.x == vec.x && self.y == vec.y && self.z == vec.z
-    }
-}
-impl ops::Mul<f64> for Vector3 {
-    type Output = Vector3;
-    fn mul(self, scalar: f64) -> Self::Output {
-        Vector3 {
-            x: self.x * scalar,
-            y: self.y * scalar,
-            z: self.z * scalar,
-        }
-    }
-}
-impl ops::Add for Vector3 {
-    type Output = Vector3;
-    fn add(self, vec: Vector3) -> Self::Output {
-        Vector3 {
-            x: self.x + vec.x,
-            y: self.y + vec.y,
-            z: self.z + vec.z,
-        }
-    }
-}
-// impl ops::Sub for Vector3 {
-//     type Output = Vector3;
-//     fn sub(self, vec: Vector3) -> Self::Output {
-//         Vector3 {
-//             x: vec.x - self.x,
-//             y: vec.y - self.y,
-//             z: vec.z - self.y,
-//         }
-//     }
-// }
-impl std::fmt::Display for Vector3 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "x: {}, y: {}, z: {}", self.x, self.y, self.z)
-    }
-}
+use std::vec;
 
 #[derive(Copy, Clone)]
 pub struct CameraCorners {
@@ -108,7 +34,6 @@ impl std::fmt::Display for Camera {
         )
     }
 }
-//https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution.html
 
 ///creates a new Main camera pointing in x direction
 pub fn new_camera() -> Camera {
@@ -275,12 +200,13 @@ fn get_intersection(
 }
 fn point_inside_triangle(
     //the issue probably arrises here...
-    _plane_normal: Vector3,
+    plane_normal: Vector3,
     triangle_p1: Vector3,
     triangle_p2: Vector3,
     triangle_p3: Vector3,
     point_on_plane: Vector3,
 ) -> bool {
+    let _ = plane_normal;
     let v_12 = vector_ab(triangle_p2, triangle_p1);
     let v_23 = vector_ab(triangle_p3, triangle_p2);
     let v_31 = vector_ab(triangle_p1, triangle_p3);
@@ -298,17 +224,7 @@ fn point_inside_triangle(
     let barycentric_c = dot_product(v31_cross_v3p, v23_cross_v2p);
     //if they have the same sign => point in triangle
 
-    if barycentric_a > 0. && barycentric_b > 0. && barycentric_c > 0.
-    //|| (barycentric_a < 0. && barycentric_b < 0. && barycentric_c < 0.)
-
-    // if dot_product(plane_normal, cross_product(v_12, v_1p)) > 0. //das hier mal genauer anschauen
-    //     && dot_product(plane_normal, cross_product(v_23, v_2p)) > 0.
-    //     && dot_product(plane_normal, cross_product(v_31, v_3p)) > 0.
-    {
-        true
-    } else {
-        false
-    }
+    barycentric_a > 0. && barycentric_b > 0. && barycentric_c > 0.
 }
 fn vector_ab(a: Vector3, b: Vector3) -> Vector3 {
     Vector3 {
@@ -318,7 +234,6 @@ fn vector_ab(a: Vector3, b: Vector3) -> Vector3 {
     }
 }
 fn cross_product(v_1: Vector3, v_2: Vector3) -> Vector3 {
-    //is not order agnostic
     Vector3 {
         x: (v_1.y * v_2.z - v_2.y * v_1.z),
         y: -1. * (v_1.x * v_2.z - v_2.x * v_1.z),
@@ -355,19 +270,19 @@ fn length_of_vector(vec: Vector3) -> f64 {
 }
 
 fn _turn_90_degrees(vec: Vector3) -> Vector3 {
-    let transform_matrix = _TransformMatrix {
-        vx: Vector3 {
+    let transform_matrix = TransformMatrix {
+        row_1: Vector3 {
             x: 0.,
             y: 0.,
-            z: -1.,
+            z: 1.,
         },
-        vy: Vector3 {
+        row_2: Vector3 {
             x: 0.,
             y: 1.,
             z: 0.,
         },
-        vz: Vector3 {
-            x: 1.,
+        row_3: Vector3 {
+            x: -1.,
             y: 0.,
             z: 0.,
         },
