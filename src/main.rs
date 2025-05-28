@@ -51,7 +51,7 @@ fn test_snapshot() {
         print!("{}", string);
     }
 }
-fn draw(vec_2d: &Vec<Vec<[u8; 3]>>) -> String {
+fn _draw(vec_2d: &Vec<Vec<[u8; 3]>>) -> String {
     let mut string = "".to_owned();
     for col in vec_2d {
         for cell in col {
@@ -148,7 +148,7 @@ mod tests {
             main_camera,
             obj.clone(),
         );
-        draw(&vec_2d);
+        _draw(&vec_2d);
         std::thread::sleep(time::Duration::from_millis(200));
     }
 }

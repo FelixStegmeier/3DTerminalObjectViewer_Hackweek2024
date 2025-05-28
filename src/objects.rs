@@ -37,7 +37,7 @@ pub struct Object {
     pub transform_vertices: Vec<[f64; 3]>,
     pub polygons: Vec<[usize; 3]>,
     pub transform_matrix: TransformMatrix,
-    pub tranlation_vector: Vector3,
+    pub _tranlation_vector: Vector3,
 }
 impl std::fmt::Display for Object {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
@@ -77,22 +77,21 @@ pub fn new_test_obj() -> Object {
     // let vertices = vec![[20., 0., 100.], [-20., 0., 100.], [0., 20., 100.]];
     // let polygons = vec![[0, 1, 2]];
 
-    let obj = Object {
-        origin: origin,
+    Object {
+        origin,
         vertices: vertices.clone(),
         transform_vertices: vertices,
-        polygons: polygons,
+        polygons,
         transform_matrix: _UNIT_MATRIX.clone(),
-        tranlation_vector: Vector3 {
+        _tranlation_vector: Vector3 {
             x: 0.,
             y: 0.,
             z: 0.,
         },
-    };
-    return obj;
+    }
 }
 
-fn calc_center_of_triangles(vertices: Vec<[f64; 3]>, polygons: Vec<[usize; 3]>) -> Vec<[f64; 3]> {
+fn _calc_center_of_triangles(vertices: Vec<[f64; 3]>, polygons: Vec<[usize; 3]>) -> Vec<[f64; 3]> {
     let mut center_points: Vec<[f64; 3]> = vec![];
 
     for polygon in polygons {
@@ -100,7 +99,7 @@ fn calc_center_of_triangles(vertices: Vec<[f64; 3]>, polygons: Vec<[usize; 3]>) 
         let point_2 = vertices[polygon[1]];
         let point_3 = vertices[polygon[2]];
 
-        let vec_1_2 = vector_from_a_to_b(point_1.clone(), point_2.clone());
+        let vec_1_2 = _vector_from_a_to_b(point_1, point_2);
         let half_vec_1_2 = [vec_1_2[0] / 2., vec_1_2[0] / 2., vec_1_2[0] / 2.];
         let halfway_point = [
             point_1[0] + half_vec_1_2[0],
@@ -108,7 +107,7 @@ fn calc_center_of_triangles(vertices: Vec<[f64; 3]>, polygons: Vec<[usize; 3]>) 
             point_1[2] + half_vec_1_2[2],
         ];
 
-        let vec_halfway_point_ponint_3 = vector_from_a_to_b(halfway_point.clone(), point_3.clone());
+        let vec_halfway_point_ponint_3 = _vector_from_a_to_b(halfway_point, point_3);
         let center_point = [
             point_3[0] + vec_halfway_point_ponint_3[0],
             point_3[1] + vec_halfway_point_ponint_3[1],
@@ -118,11 +117,11 @@ fn calc_center_of_triangles(vertices: Vec<[f64; 3]>, polygons: Vec<[usize; 3]>) 
         center_points.push(center_point);
         //halfway_point + halfway_point to ponint_3 / 2
     }
-    return center_points;
+    center_points
 }
 
-fn vector_from_a_to_b(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
-    return [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+fn _vector_from_a_to_b(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
+    [b[0] - a[0], b[1] - a[1], b[2] - a[2]]
 }
 
 #[derive(Clone)]

@@ -1,12 +1,12 @@
 use crate::objects;
 use core::panic;
 use std::{ops, vec};
-struct TransformMatrix {
+struct _TransformMatrix {
     vx: Vector3,
     vy: Vector3,
     vz: Vector3,
 }
-impl ops::Mul<Vector3> for TransformMatrix {
+impl ops::Mul<Vector3> for _TransformMatrix {
     type Output = Vector3;
     fn mul(self, vec: Vector3) -> Self::Output {
         Vector3 {
@@ -19,13 +19,13 @@ impl ops::Mul<Vector3> for TransformMatrix {
 /// 1,1
 /// transform matrix:   |0  -1| 1   -1
 ///                     |1   0| 1   11
-struct Plane {
+struct _Plane {
     a: f64,
     b: f64,
     c: f64,
     d: f64,
 }
-impl std::fmt::Display for Plane {
+impl std::fmt::Display for _Plane {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "Plane: {}x {}y {}z {}", self.a, self.b, self.c, self.d)
     }
@@ -118,7 +118,7 @@ pub fn new_camera() -> Camera {
         z: -50.,
     };
     let _corners = initialize_camera_corners(_position, 30.);
-    let main_camera = Camera {
+    Camera {
         corners: CameraCorners {
             top_left: _corners[0],
             top_right: _corners[1],
@@ -132,8 +132,7 @@ pub fn new_camera() -> Camera {
             y: 0.,
             z: 0.,
         },
-    };
-    return main_camera;
+    }
 }
 
 fn initialize_camera_corners(position: Vector3, distance: f64) -> [Vector3; 4] {
@@ -170,7 +169,7 @@ fn initialize_camera_corners(position: Vector3, distance: f64) -> [Vector3; 4] {
         z: center.z,
     };
 
-    return [top_left, top_right, bottom_left, bottom_right];
+    [top_left, top_right, bottom_left, bottom_right]
 }
 
 ///iterates over world coords in camera
@@ -239,7 +238,7 @@ pub fn raycasting(
 
         map_2d.push(row);
     }
-    return map_2d;
+    map_2d
 }
 
 ///returns the vector if the ray intersects the plane inside the triangle
@@ -272,11 +271,11 @@ fn get_intersection(
         //order matters! 123 and 321 show very different results! probably because the normal is flipped
         return Some(p);
     }
-    return None;
+    None
 }
 fn point_inside_triangle(
     //the issue probably arrises here...
-    plane_normal: Vector3,
+    _plane_normal: Vector3,
     triangle_p1: Vector3,
     triangle_p2: Vector3,
     triangle_p3: Vector3,
@@ -299,16 +298,16 @@ fn point_inside_triangle(
     let barycentric_c = dot_product(v31_cross_v3p, v23_cross_v2p);
     //if they have the same sign => point in triangle
 
-    if (barycentric_a > 0. && barycentric_b > 0. && barycentric_c > 0.)
+    if barycentric_a > 0. && barycentric_b > 0. && barycentric_c > 0.
     //|| (barycentric_a < 0. && barycentric_b < 0. && barycentric_c < 0.)
 
     // if dot_product(plane_normal, cross_product(v_12, v_1p)) > 0. //das hier mal genauer anschauen
     //     && dot_product(plane_normal, cross_product(v_23, v_2p)) > 0.
     //     && dot_product(plane_normal, cross_product(v_31, v_3p)) > 0.
     {
-        return true;
+        true
     } else {
-        return false;
+        false
     }
 }
 fn vector_ab(a: Vector3, b: Vector3) -> Vector3 {
@@ -338,7 +337,7 @@ fn vector_to_unit_vector(vec: Vector3) -> Vector3 {
         y: vec.y / len,
         z: vec.z / len,
     };
-    if (vec.x.is_nan() || vec.y.is_nan() || vec.z.is_nan()) {
+    if vec.x.is_nan() || vec.y.is_nan() || vec.z.is_nan() {
         panic!();
     }
     vec
@@ -355,8 +354,8 @@ fn length_of_vector(vec: Vector3) -> f64 {
     res
 }
 
-fn turn_90_degrees(vec: Vector3) -> Vector3 {
-    let transform_matrix = TransformMatrix {
+fn _turn_90_degrees(vec: Vector3) -> Vector3 {
+    let transform_matrix = _TransformMatrix {
         vx: Vector3 {
             x: 0.,
             y: 0.,
@@ -375,19 +374,19 @@ fn turn_90_degrees(vec: Vector3) -> Vector3 {
     };
     transform_matrix * vec
 }
-pub fn transform_camera(camera: &Camera) -> Camera {
+pub fn _transform_camera(camera: &Camera) -> Camera {
     let origin = camera.origin;
-    let position = turn_90_degrees(camera.position);
+    let position = _turn_90_degrees(camera.position);
     let corners = CameraCorners {
-        top_left: turn_90_degrees(camera.corners.top_left),
-        top_right: turn_90_degrees(camera.corners.top_right),
-        bottom_left: turn_90_degrees(camera.corners.bottom_left),
-        bottom_right: turn_90_degrees(camera.corners.bottom_right),
+        top_left: _turn_90_degrees(camera.corners.top_left),
+        top_right: _turn_90_degrees(camera.corners.top_right),
+        bottom_left: _turn_90_degrees(camera.corners.bottom_left),
+        bottom_right: _turn_90_degrees(camera.corners.bottom_right),
     };
     Camera {
-        corners: corners,
-        position: position,
-        origin: origin,
+        corners,
+        position,
+        origin,
     }
 }
 
@@ -527,7 +526,7 @@ mod tests {
     }
     #[test]
     fn test_get_intersection_2() {
-        let vertices = vec![
+        let _vertices = vec![
             [1000., -1200., 0.],
             [-1000., -1200., 0.],
             [0., 400., 0.],
